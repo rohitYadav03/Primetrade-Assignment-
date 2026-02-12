@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
-import { loginService, registerService } from "../service/authService.js";
+import { getCurrentUser, loginService, registerService } from "../service/authService.js";
+import type { AuthRequest } from "../middleware/auth.middleware.js";
 
 export async function registerUser(req: Request, res: Response) {
   try {
@@ -49,6 +50,31 @@ export async function loginUser(req: Request, res: Response) {
 
     return res.status(200).json({
       message: "Login successful",
+      user,
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+}
+
+export async function getMe(
+  req: AuthRequest,
+  res: Response
+) {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    const user = await getCurrentUser(userId);
+
+    return res.status(200).json({
       user,
     });
   } catch (error: any) {
