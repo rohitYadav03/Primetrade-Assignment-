@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());
+
 app.use(cors({
     origin : "http://localhost:5173",
     credentials : true
@@ -18,6 +19,10 @@ app.get("/ping", (req , res) => {
 
 
 app.use("/api/v1", v1Router);
+
+app.get("/",( req: Request, res: Response) => {
+   return res.send("Backend is hosted here and working")
+})
 
 app.use((req : Request, res : Response) => {
   res.status(404).json({ message: "Route not found" });
