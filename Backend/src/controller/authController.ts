@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { getCurrentUser, loginService, registerService } from "../service/authService.js";
+import { getAllUsersService, getCurrentUser, loginService, registerService } from "../service/authService.js";
 import type { AuthRequest } from "../middleware/auth.middleware.js";
 
 export async function registerUser(req: Request, res: Response) {
@@ -76,6 +76,22 @@ export async function getMe(
 
     return res.status(200).json({
       user,
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+}
+
+export async function getAllUsers(req: AuthRequest, res: Response) {
+  try {
+    const users = await getAllUsersService();
+
+    return res.status(200).json({
+      message: "Users retrieved successfully",
+      count: users.length,
+      users,
     });
   } catch (error: any) {
     return res.status(400).json({

@@ -2,7 +2,6 @@ import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/server.config.js";
 
-
 export interface AuthRequest extends Request {
   user?: {
     id: string;
@@ -10,17 +9,17 @@ export interface AuthRequest extends Request {
   };
 }
 
-export function authenticate(
+export async function authenticate(
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const token = req.cookies?.token;
+    const token = req.cookies.token;
 
     if (!token) {
       return res.status(401).json({
-        message: "Unauthorized: No token provided",
+        message: "Authentication required",
       });
     }
 
@@ -30,11 +29,44 @@ export function authenticate(
     };
 
     req.user = decoded;
-
     next();
   } catch (error) {
     return res.status(401).json({
-      message: "Unauthorized: Invalid token",
+      message: "Invalid or expired token",
     });
   }
+}
+
+export function authorizeAdmin(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required",
+    });
+  }
+
+  if (req.user.role !== "Admin") {
+    return res.status(403).json({
+      message: "Access forbidden. Admin privileges required.",
+    });
+  }
+
+  next();
+}
+
+export function authorizeTaskOwnerOrAdmin(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required",
+    });
+  }
+
+  next();
 }
